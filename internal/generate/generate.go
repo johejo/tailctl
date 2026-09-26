@@ -357,6 +357,9 @@ func commandView(resourceName string, op operation) commandData {
 	if op.outputShape != nil {
 		data.Schemas.Output = &outputSchemaData{Shape: op.outputShape, Format: op.outputFormat}
 	}
+	if resourceName == "PolicyFile" && op.name == "Get" {
+		data.Schemas.Output = &outputSchemaData{Shape: &shape{Kind: "any"}, Format: "JSON"}
+	}
 	for i, p := range op.params {
 		data.Params = append(data.Params, parameterView(p, "arg"+strconv.Itoa(i), data.Schemas.Inputs))
 	}

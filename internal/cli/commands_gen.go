@@ -1206,16 +1206,13 @@ func addGeneratedCommands(root *cobra.Command, client *tailscale.Client) {
 				Long:  "Get retrieves the [ACL] that is currently set for the tailnet.\n",
 				Args:  cobra.NoArgs,
 			}
+			cmd.Flags().String("format", "json", "Output format: json or hujson")
 			cmd.RunE = func(cmd *cobra.Command, _ []string) error {
-				result, callErr := client.PolicyFile().Get(cmd.Context())
-				if callErr != nil {
-					return callErr
-				}
-				return writeJSON(cmd, result)
+				return writePolicyFile(cmd, client)
 			}
 			configureCommandSchemas(cmd, commandSchemas{
 				Inputs: map[string]*jsonShape{},
-				Output: &outputSchema{Format: "JSON", Shape: &jsonShape{Ref: "ACL", Nullable: true}},
+				Output: &outputSchema{Format: "JSON", Shape: &jsonShape{Kind: "any"}},
 			})
 			group.AddCommand(cmd)
 		}

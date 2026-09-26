@@ -32,6 +32,9 @@ func TestGeneratedCommands(t *testing.T) {
 		{name: "optional enum type", args: []string{"users", "list", "--user-type", "shared"}, method: "GET", path: "/api/v2/tailnet/-/users", query: "type=shared", response: `{"users":[]}`, output: "[]\n"},
 		{name: "logging enum", args: []string{"logging", "logstream-configuration", "--log-type", "configuration"}, method: "GET", path: "/api/v2/tailnet/-/logging/configuration/stream", response: `{}`, output: "{}\n"},
 		{name: "raw HuJSON", args: []string{"policy-file", "set", "--acl", "@-"}, stdin: "{// comment\n}", method: "POST", path: "/api/v2/tailnet/-/acl", body: "{// comment\n}", contentType: "application/hujson"},
+		{name: "policy HuJSON with string grant app", args: []string{"policy-file", "get"}, method: "GET", path: "/api/v2/tailnet/-/acl", response: "{// comment\n\"grants\":[{\"src\":[\"*\"],\"dst\":[\"*\"],\"app\":\"example\"},],}", output: "{\"grants\":[{\"src\":[\"*\"],\"dst\":[\"*\"],\"app\":\"example\"}]}\n"},
+		{name: "policy HuJSON output", args: []string{"policy-file", "get", "--format", "hujson"}, method: "GET", path: "/api/v2/tailnet/-/acl", response: "{// comment\n\"grants\":[],}\n", output: "{// comment\n\"grants\":[],}\n"},
+		{name: "policy explicit JSON output", args: []string{"policy-file", "get", "--format", "json"}, method: "GET", path: "/api/v2/tailnet/-/acl", response: "{// comment\n\"grants\":[],}\n", output: "{\"grants\":[]}\n"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -90,6 +93,7 @@ func TestInvalidInputDoesNotCallAPI(t *testing.T) {
 		{"devices", "list", "--filter", "bad"},
 		{"devices", "list", "--fields", "bad"},
 		{"keys", "create-auth-key", "--ckr", "{"},
+		{"policy-file", "get", "--format", "invalid"},
 	} {
 		cmd := newCommand(&tailscale.Client{HTTP: &http.Client{Transport: rejectTransport{t}}})
 		cmd.SetArgs(args)

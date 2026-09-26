@@ -23,6 +23,9 @@ func addGeneratedCommands(root *cobra.Command, client *tailscale.Client) {
 				Long: {{ printf "%q" .Long }},
 				Args: cobra.NoArgs,
 			}
+			{{- if and (eq .Resource "PolicyFile") (eq .Method "Get") }}
+			cmd.Flags().String("format", "json", "Output format: json or hujson")
+			{{- end }}
 			{{- range .Params }}
 			{{- template "flag" . }}
 			{{- end }}
@@ -30,7 +33,9 @@ func addGeneratedCommands(root *cobra.Command, client *tailscale.Client) {
 				{{- range .Params }}
 				{{- template "input" . }}
 				{{- end }}
-				{{- if .Result }}
+				{{- if and (eq .Resource "PolicyFile") (eq .Method "Get") }}
+				return writePolicyFile(cmd, client)
+				{{- else if .Result }}
 				result, callErr := {{ template "call" . }}
 				if callErr != nil {
 					return callErr

@@ -17,6 +17,7 @@ export TAILCTL_API_KEY=YOUR_API_KEY
 ./tailctl users list --role admin
 ./tailctl keys create-auth-key --ckr @key-request.json
 ./tailctl policy-file validate --acl @policy.hujson
+./tailctl policy-file get --format hujson > policy.hujson
 ./tailctl logging get-network-flow-logs --params '{"Start":"2026-09-20T00:00:00Z","End":"2026-09-21T00:00:00Z"}'
 ```
 
@@ -27,15 +28,17 @@ the SDK, such as `--ckr`.
 - Repeat list flags for multiple values. Filters use `key=value`, for example
   `--filter os=linux --filter os=macos`.
 - Boolean flags can be supplied explicitly as `--authorized=false`.
-- Results are JSON on stdout. Network flow logs are streamed as JSON Lines.
+- Results are JSON on stdout, except `policy-file get --format hujson`, which
+  prints the original policy text. Network flow logs are streamed as JSON Lines.
   Commands with no result are silent on success.
 - Errors go to stderr and cause exit status 1.
 
 ## JSON input
 
 JSON flags accept inline JSON, `@file`, or `@-` for standard input. Use at most
-one stdin input per invocation. Policy-file commands accept raw HuJSON in the
-same forms.
+one stdin input per invocation. `policy-file set` and `policy-file validate`
+accept raw HuJSON in the same forms. `policy-file set-and-get` accepts JSON
+matching the SDK's ACL type.
 
 Inputs are validated before calling the API:
 
